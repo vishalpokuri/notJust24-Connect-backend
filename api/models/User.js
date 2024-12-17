@@ -28,9 +28,16 @@ const userSchema = new mongoose.Schema({
     required: false,
     ref: "SocialMedia",
   },
-  profilePhoto: {
-    type: mongoose.Schema.Types.ObjectId, // Store the ObjectId of the photo in GridFS
-    ref: "Photo", // Reference to the photo model (if needed)
+  workplace: {
+    type: String,
+    required: false,
+  },
+  description: {
+    type: String,
+    required: false,
+  },
+  profilePhotoKey: {
+    type: String,
     required: false,
   },
 });

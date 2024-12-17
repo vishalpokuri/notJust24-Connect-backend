@@ -10,7 +10,6 @@ const authRoutes = require("./routes/authRoutes");
 const socialMediaRoutes = require("./routes/socialMediaRoutes");
 const userSelfieRoutes = require("./routes/userSelfieRoutes");
 const userDataRoutes = require("./routes/userDataRoutes");
-const photoRoutes = require("./routes/photoRoutes");
 const app = express();
 const presignedURLroutes = require("./routes/generatePresignedURL");
 connectDB();
@@ -28,7 +27,6 @@ app.use("/api/auth", authRoutes);
 app.use("/api/sociallinks", socialMediaRoutes);
 app.use("/api/userphoto", userSelfieRoutes);
 app.use("/api/userData", userDataRoutes);
-app.use("/api/photos", photoRoutes);
 
 app.get("/api/protected", verifyToken, (req, res) => {
   res.json({

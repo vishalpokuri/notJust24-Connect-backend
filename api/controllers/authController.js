@@ -21,6 +21,11 @@ exports.signup = async (req, res) => {
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
+      if (existingUser.onboardingLevel > 3) {
+        return res.status(200).json({
+          message: "User fully signed up, redirect to login",
+        });
+      }
       return res.status(200).json({
         message: "User already exists, sending onboarding level",
         level: existingUser.onboardingLevel,
@@ -95,7 +100,6 @@ exports.verifyOTP = async (req, res) => {
         refreshToken,
       });
     }
-    // otpStorage = {};
   } catch (e) {
     console.error(e);
     return res.status(400).json({ message: "Invalid otp" });
