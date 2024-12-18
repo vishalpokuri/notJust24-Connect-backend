@@ -7,9 +7,9 @@ const verifyToken = (req, res, next) => {
   jwt.verify(token.split(" ")[1], process.env.SECRET_KEY, (err, decoded) => {
     if (err) {
       if (err.name === "TokenExpiredError") {
-        return res.status(401).json({ message: "Token expired" });
+        return res.status(401).json({ message: "Token expired", err });
       } else {
-        return res.status(401).json({ message: "Unauthorized" });
+        return res.status(401).json({ message: "Unauthorized", err });
       }
     }
 

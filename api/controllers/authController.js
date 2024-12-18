@@ -19,18 +19,18 @@ exports.signup = async (req, res) => {
   const otp = crypto.randomInt(100000, 999999).toString();
   otpStorage["otp"] = otp;
   try {
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      if (existingUser.onboardingLevel > 3) {
-        return res.status(200).json({
-          message: "User fully signed up, redirect to login",
-        });
-      }
-      return res.status(200).json({
-        message: "User already exists, sending onboarding level",
-        level: existingUser.onboardingLevel,
-      });
-    }
+    // const existingUser = await User.findOne({ email });
+    // if (existingUser) {
+    //   if (existingUser.onboardingLevel > 3) {
+    //     return res.status(200).json({
+    //       message: "User fully signed up, redirect to login",
+    //     });
+    //   }
+    //   return res.status(200).json({
+    //     message: "User already exists, sending onboarding level",
+    //     level: existingUser.onboardingLevel,
+    //   });
+    // }
     //Generate OTP
 
     const transporter = nodemailer.createTransport({
@@ -82,17 +82,40 @@ exports.resendOTP = async (req, res) => {
 };
 
 exports.verifyOTP = async (req, res) => {
-  const { otp } = req.body;
+  const { otp, email } = req.body;
   try {
     if (otpStorage["otp"] == otp) {
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        const accessToken = generateAccessToken(existingUser._id);
+        const refreshToken = generateRefreshToken(existingUser._id);
+
+        if (existingUser.onboardingLevel > 3) {
+          //login page redirect
+          return res.status(200).json({
+            message: "User fully signed up, redirect to login",
+            accessToken,
+            refreshToken,
+            userId: existingUser._id,
+          });
+        }
+        //Page redirect
+        return res.status(200).json({
+          message: "User already exists, sending onboarding level",
+          level: existingUser.onboardingLevel,
+          accessToken,
+          refreshToken,
+          userId: existingUser._id,
+        });
+      }
       const newUser = new User({
         email: otpStorage["email"],
         password: hashPassword(otpStorage["password"]),
         onboardingLevel: 1,
       });
       await newUser.save();
-      const accessToken = generateAccessToken(newUser._id, newUser.username);
-      const refreshToken = generateRefreshToken(newUser._id, newUser.username);
+      const accessToken = generateAccessToken(newUser._id);
+      const refreshToken = generateRefreshToken(newUser._id);
       res.status(201).json({
         message: "User registered successfully",
         userId: newUser._id,

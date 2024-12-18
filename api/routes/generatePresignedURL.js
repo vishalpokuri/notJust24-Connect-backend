@@ -41,7 +41,7 @@ router.post("/filekey", async (req, res) => {
   try {
     const updatedUser = await User.findOneAndUpdate(
       { email: email },
-      { profilePhotoKey: key },
+      { profilePhotoKey: key, onboardingLevel: 4 },
       {
         new: true,
       }
