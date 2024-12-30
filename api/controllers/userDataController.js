@@ -62,3 +62,47 @@ exports.addSocials = async (req, res) => {
     });
   }
 };
+
+exports.userData = async (req, res) => {
+  const userId = req.query.userId;
+  try {
+    const existingUser = await User.findOne({ _id: userId }).populate([
+      { path: "socialMediaData" },
+      {
+        path: "lists",
+        populate: {
+          path: "connections",
+          select: "-userId1",
+          populate: {
+            path: "userId2",
+            select: "-email -password -onboardingLevel -lists ",
+            populate: "socialMediaData",
+          },
+        },
+      },
+    ]);
+    if (!existingUser) {
+      return res.status(400).json({
+        message: `User not found with the userId: ${userId} at profile`,
+      });
+    }
+    //Sent data
+    const userData = {
+      name: existingUser.name,
+      username: existingUser.username,
+      socialMediaData: existingUser.socialMediaData,
+      profilePhotoKey: existingUser.profilePhotoKey,
+      lists: existingUser.lists,
+      workplace: existingUser.workplace,
+      description: existingUser.description,
+    };
+    return res
+      .status(200)
+      .json({ mesage: "User fetch successful", userData: userData });
+  } catch (e) {
+    console.error(e);
+    res.status(400).json({
+      message: "An error occurred while fetching user Details",
+    });
+  }
+};

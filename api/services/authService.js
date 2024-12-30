@@ -13,6 +13,14 @@ const generateRefreshToken = (userId) => {
   });
 };
 
+const verifyRefreshToken = (refreshToken) => {
+  try {
+    return jwt.verify(refreshToken, process.env.REFRESH_SECRET_KEY);
+  } catch (error) {
+    return null;
+  }
+};
+
 const hashPassword = (password) => {
   return bcrypt.hashSync(password, 8);
 };
@@ -26,4 +34,5 @@ module.exports = {
   generateRefreshToken,
   hashPassword,
   comparePassword,
+  verifyRefreshToken,
 };

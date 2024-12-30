@@ -40,6 +40,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
+  lists: [{ type: mongoose.Schema.Types.ObjectId, ref: "List" }],
 });
 
 module.exports = mongoose.model("User", userSchema);

@@ -8,15 +8,20 @@ const verifyToken = require("./middleware/authMiddleware");
 // Routes
 const authRoutes = require("./routes/authRoutes");
 const socialMediaRoutes = require("./routes/socialMediaRoutes");
-const userSelfieRoutes = require("./routes/userSelfieRoutes");
+
 const userDataRoutes = require("./routes/userDataRoutes");
-const app = express();
+const allQRConnectionRoutes = require("./routes/AllQRConnectionRoutes");
 const presignedURLroutes = require("./routes/generatePresignedURL");
+const listRoutes = require("./routes/listRoutes");
+const noteRoutes = require("./routes/noteRoutes");
+
+//Connection Initiation
+const app = express();
 connectDB();
 
 app.use(
   cors({
-    origin: "*",
+    origin: "*", //TODO: Need to modify the origin later
   })
 );
 // hello {-_-}
@@ -25,8 +30,11 @@ app.use(bodyParser.json());
 app.use("/api/aws", presignedURLroutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/sociallinks", socialMediaRoutes);
-app.use("/api/userphoto", userSelfieRoutes);
+
 app.use("/api/userData", userDataRoutes);
+app.use("/api/QR", allQRConnectionRoutes);
+app.use("/api/list", listRoutes);
+app.use("/api/notes", noteRoutes);
 
 app.get("/api/protected", verifyToken, (req, res) => {
   res.json({
