@@ -20,7 +20,7 @@ exports.fetchUserAfterScan = async (req, res) => {
   } catch (error) {
     console.log("Error fetching User with QR:", error);
     res.status(500).json({
-      error: "Internal server error",
+      message: `Error fetching User with QR: ${error}`,
     });
   }
 };

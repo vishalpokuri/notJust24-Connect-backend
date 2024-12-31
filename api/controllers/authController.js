@@ -13,7 +13,149 @@ const {
 exports.signup = async (req, res) => {
   const { email, password } = req.body;
   const otp = crypto.randomInt(100000, 999999).toString();
-  console.log(otp);
+
+  try {
+    //Changed major flaw
+    const otpToken = jwt.sign(
+      { email, password, otp },
+      process.env.SECRET_KEY,
+      {
+        expiresIn: "10m",
+      }
+    );
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.NODEMAILER_EMAIL,
+        pass: process.env.NODEMAILER_PASSWORD,
+      },
+    });
+    const mailOptions = {
+      from: process.env.NODEMAILER_EMAIL,
+      to: email,
+      subject: "[Connect] Verify your Connect account",
+      html: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OTP Verification</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+    .email-container {
+      max-width: 600px;
+      margin: 20px auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
+    .email-header {
+      text-align: center;
+      background-color: #4caf50;
+      color: #ffffff;
+      padding: 10px 0;
+      border-radius: 8px 8px 0 0;
+    }
+    .email-header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+    .email-body {
+      padding: 20px;
+      text-align: center;
+    }
+    .otp-code {
+      font-size: 28px;
+      font-weight: bold;
+      color: #4caf50;
+      margin: 20px 0;
+    }
+    .email-footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 12px;
+      color: #777;
+    }
+    .button {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4caf50;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+    .button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="email-header">
+      <h1>Welcome to Connect!</h1>
+    </div>
+    <div class="email-body">
+      <p>We’re thrilled to have you here! Use the OTP below to verify your account:</p>
+      <div class="otp-code">${otp}</div>
+      <p>This OTP is valid for 10 minutes. Please do not share it with anyone.</p>
+      
+    </div>
+    <div class="email-footer">
+      <p>If you didn’t request this, please ignore this email.</p>
+    </div>
+  </div>
+</body>
+</html>
+`,
+    };
+
+    try {
+      await transporter.sendMail(mailOptions);
+    } catch (e) {
+      console.log("Error sending mail", e);
+    }
+    res.status(200).json({ message: "OTP sent to your email", otpToken });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+    throw error;
+  }
+};
+
+exports.signin = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const existingUser = await User.findOne({
+      email,
+    });
+
+    if (!existingUser) {
+      return res.status(500).json({
+        message: "User doesnt exist, create an account first",
+      });
+    }
+    //TODO: OTP console removal
+    if (existingUser && !comparePassword(password, existingUser.password)) {
+      return res.status(500).json({
+        message: "Email and Password combination didnt match",
+      });
+    }
+  } catch (err) {
+    console.log(err);
+  }
+  const otp = crypto.randomInt(100000, 999999).toString();
+  
   try {
     //Changed major flaw
     const otpToken = jwt.sign(
@@ -301,13 +443,14 @@ exports.verifyOTP = async (req, res) => {
         userId: newUser._id,
         accessToken,
         refreshToken,
+        level: 1,
       });
     } else {
       res.status(400).json({ message: "Invalid OTP" });
     }
   } catch (error) {
     console.error(error);
-    res.status(400).json({ message: "Invalid or expired OTP token" });
+    res.status(400).json({ message: `Invalid or expired OTP token: ${error}` });
   }
 };
 

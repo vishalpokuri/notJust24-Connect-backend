@@ -106,3 +106,35 @@ exports.userData = async (req, res) => {
     });
   }
 };
+
+exports.limiteduserData = async (req, res) => {
+  const userId = req.query.userId;
+
+  try {
+    const existingUser = await User.findOne({ _id: userId }).populate({
+      path: "socialMediaData",
+    });
+    if (!existingUser) {
+      return res.status(400).json({
+        message: `User not found with the userId: ${userId} at profile`,
+      });
+    }
+
+    const userData = {
+      name: existingUser.name,
+      username: existingUser.username,
+      socialMediaData: existingUser.socialMediaData,
+      description: existingUser.description,
+      profilePhotoKey: existingUser.profilePhotoKey,
+      workplace: existingUser.workplace,
+    };
+    return res.status(200).json({
+      ...userData,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(400).json({
+      message: "An error occurred while fetching user Details",
+    });
+  }
+};
