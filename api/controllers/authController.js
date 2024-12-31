@@ -20,7 +20,7 @@ exports.signup = async (req, res) => {
       { email, password, otp },
       process.env.SECRET_KEY,
       {
-        expiresIn: "10m",
+        expiresIn: 600,
       }
     );
 
@@ -155,14 +155,14 @@ exports.signin = async (req, res) => {
     console.log(err);
   }
   const otp = crypto.randomInt(100000, 999999).toString();
-  
+
   try {
     //Changed major flaw
     const otpToken = jwt.sign(
       { email, password, otp },
       process.env.SECRET_KEY,
       {
-        expiresIn: "10m",
+        expiresIn: 600,
       }
     );
 
@@ -284,7 +284,7 @@ exports.resendOTP = async (req, res) => {
     const newOtpToken = jwt.sign(
       { email: decoded.email, password: decoded.password, otp },
       process.env.SECRET_KEY,
-      { expiresIn: "10m" }
+      { expiresIn: 600 }
     );
 
     const transporter = nodemailer.createTransport({
