@@ -42,7 +42,9 @@ app.get("/api/protected", verifyToken, (req, res) => {
     userId: req.userId,
   });
 });
-
+app.get("/test", (req, res) => {
+  res.json({ message: "API is working" });
+});
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
