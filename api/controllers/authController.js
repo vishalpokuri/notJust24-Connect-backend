@@ -8,6 +8,7 @@ const {
   generateRefreshToken,
   hashPassword,
   comparePassword,
+  verifyRefreshToken,
 } = require("../services/authService");
 
 exports.signup = async (req, res) => {
@@ -155,7 +156,7 @@ exports.signin = async (req, res) => {
     console.log(err);
   }
   const otp = crypto.randomInt(100000, 999999).toString();
-  
+
   try {
     //Changed major flaw
     const otpToken = jwt.sign(
