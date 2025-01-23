@@ -1,5 +1,9 @@
 const mongoose = require("mongoose");
 
+const roomSchema = new mongoose.Schema({
+  roomId: { type: String, required: true },
+  isArchived: { type: Boolean, default: false },
+});
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -40,6 +44,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
+  currentRooms: [roomSchema],
   lists: [{ type: mongoose.Schema.Types.ObjectId, ref: "List" }],
 });
 
@@ -52,4 +57,12 @@ Onboarding levels
 3 -> Profile and description
 4 -> Fully onboarded (if 4 then Prompt to go for login page)
 
+*/
+/*
+The current rooms shows up the list of rooms the person previously accessed, 
+The model is to be in this way,
+{
+  roomId,
+  isArchived, (two sections in the room, archived can be seen in another screen -> paid access)
+}
 */
