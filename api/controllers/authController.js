@@ -120,12 +120,13 @@ exports.signup = async (req, res) => {
 `,
     };
 
-    try {
-      await transporter.sendMail(mailOptions);
-    } catch (e) {
-      console.log("Error sending mail", e);
-    }
     res.status(200).json({ message: "OTP sent to your email", otpToken });
+    setImmediate(() => {
+      transporter
+        .sendMail(mailOptions)
+        .then(() => console.log("Mail sent successfully"))
+        .catch((error) => console.error(error));
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
@@ -146,7 +147,7 @@ exports.signin = async (req, res) => {
         message: "User doesnt exist, create an account first",
       });
     }
-    //TODO: OTP console removal
+
     if (existingUser && !comparePassword(password, existingUser.password)) {
       return res.status(500).json({
         message: "Email and Password combination didnt match",
@@ -262,12 +263,13 @@ exports.signin = async (req, res) => {
 `,
     };
 
-    try {
-      await transporter.sendMail(mailOptions);
-    } catch (e) {
-      console.log("Error sending mail", e);
-    }
     res.status(200).json({ message: "OTP sent to your email", otpToken });
+    setImmediate(() => {
+      transporter
+        .sendMail(mailOptions)
+        .then(() => console.log("Mail sent successfully"))
+        .catch((error) => console.error(error));
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
